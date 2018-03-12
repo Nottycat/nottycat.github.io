@@ -18,6 +18,7 @@ var walkersAmount = 100;
 var walksPerFrame = 500;
 
 var dla;
+var paused = false;
 
 function setup() {
   dla = new DLA();
@@ -84,13 +85,18 @@ function setup() {
   createP("");
   resetButton = createButton("Reset");
   resetButton.mousePressed(reset);
+  pauseButton = createButton("Pause");
+  pauseButton.mousePressed(pause);
   
   this.dla.reset();
 }
 
 function draw() {
   dla.drawBackground();
-  dla.walk();
+  if (!paused) {
+    dla.walk();
+  }
+
   dla.show();
   radiusDiv.html("Radius: " + realRadius + ". Grown to: " + radius);
   colorDiv.html("Start r: " + realR + ". Start g: " + realG + ". Start b: " + realB + ". Grown to; r: " + startR + ", g: " + startG + ", b: " + startB);
@@ -208,4 +214,14 @@ function setChangeB() {
 
 function reset() {
   dla.reset();
+}
+
+function pause() {
+  if (paused) {
+    paused = false;
+    pauseButton.html("Pause");
+  } else {
+    paused = true;
+    pauseButton.html("Continue");
+  }
 }
