@@ -2,6 +2,9 @@ function Walker(x, y, radius, isStuck) {
     this.pos = createVector(x, y);
     this.isStuck = isStuck;
     this.radius = radius;
+    this.r = 255;
+    this.g = 0;
+    this.b = 100;
 
     this.walk = function() {
         this.pos.add(p5.Vector.random2D());
@@ -10,11 +13,13 @@ function Walker(x, y, radius, isStuck) {
     }
 
     this.checkStuck = function(others) {
-        for (var i = 0; i < others.length; i++) {
-            var distance = distanceSquared(this.pos, others[i].pos);
-            if (distance < (this.radius * others[i].radius * 4)) {
-                this.isStuck = true;
-                return true;
+        if (others != undefined) {
+            for (var i = 0; i < others.length; i++) {
+                var distance = distanceSquared(this.pos, others[i].pos);
+                if (distance < (this.radius * others[i].radius * 4)) {
+                    this.isStuck = true;
+                    return true;
+                }
             }
         }
 
@@ -22,9 +27,9 @@ function Walker(x, y, radius, isStuck) {
     }
 
     this.show = function() {
-        stroke(255, 100);
+        noStroke();
         if (this.isStuck) {
-            fill(255, 0, 100);
+            fill(this.r, this.g, this.b);
         } else {
             fill(255);
         }

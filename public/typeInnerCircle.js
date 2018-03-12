@@ -1,10 +1,18 @@
 
-function TypeOriginal() {
-    this.name = "Original";
+function TypeInnerCircle() {
+    this.name = "InnerCircle";
     this.generateStartTree = function() {
-        /* Default start with 1 walker in the middle. */
+        /* Default start with walkers around the circle. */
         tree = [];
-        tree.push(new Walker(width / 2, height / 2, radius, true));
+
+        circumference = 2 * PI * floor(width / 8 / 2);
+        walkerAmount = floor(circumference / (radius * 2));
+        angleAdditionAmount = (2 * PI) / walkerAmount;
+        currentAngle = 0;
+        for (let i = 0; i < walkerAmount; i ++) {
+            tree.push(new Walker((width / 2) + floor(width / 8 / 2) * cos(currentAngle), (height / 2) + floor(width / 8 / 2) * sin(currentAngle), radius, true));
+            currentAngle += angleAdditionAmount;
+        }
 
         return tree;
     }
@@ -26,7 +34,7 @@ function TypeOriginal() {
 
         return new Walker(pos.x, pos.y, radius, false);
     }
-
+    
     this.checkDone = function(walker) {
         if (floor(walker.pos.x) == 0 || floor(walker.pos.y) == 0 || floor(walker.pos.x) == width || floor(walker.pos.y ) == height) {
             return true;
@@ -34,8 +42,11 @@ function TypeOriginal() {
 
         return false;
     }
-
+    
     this.drawBackground = function() {
         background(0);
+        fill(255, 0, 100);
+        noStroke();
+        ellipse(width / 2, height / 2, floor(width / 8), floor(width / 8));
     }
 }    

@@ -30,17 +30,18 @@ function DLA() {
                     || (gridPos + this.gridWidth + 1 < this.gridLength && this.walkers[i].checkStuck(this.grid[gridPos + this.gridWidth + 1]));
 
                     if (stuck) {
-                        this.addToTree(this.walkers[i]);
+                        this.addToTree(this.walkers[i], true);
 
                         /* Check if the adding of this walker finishes the dla. */
                         if (this.type.checkDone(this.walkers[i])) {
                             this.done = true;
+                            return;
                         }
 
                         this.walkers.splice(i, 1);
                         
                         if (!this.done) {
-                            this.walkers.push(this.type.createWalker());
+                            this.createWalker();
                         }
                     }
                 }
@@ -64,16 +65,31 @@ function DLA() {
         if (this.type != null) {
             startTree = this.type.generateStartTree();
             for (let i = 0; i < tree.length; i++) {
-                this.addToTree(startTree[i]);
+                this.addToTree(startTree[i], false);
             }
 
             for (let i = 0; i < walkersAmount; i++) {
-                this.walkers.push(this.type.createWalker());
+                this.createWalker();
             }
         }
     }
 
-    this.addToTree = function(walker) {
+    this.addToTree = function(walker, changeColour) {
+        /* Set the colors of the walker. */
+        if (changeColour) {
+            startR += changeR;
+            startG += changeG;
+            startB += changeB;
+        }
+        
+        constrain(startR, 0, 255);
+        constrain(startG, 0, 255);
+        constrain(startB, 0, 255);
+
+        walker.r = floor(startR);
+        walker.g = floor(startG);
+        walker.b = floor(startB);
+
         /* Calculate where in the grid the walker is and add them to the grid. */
         let gridPos = this.getGridPosition(walker);
         // console.log("GridPos: " + gridPos);
@@ -81,8 +97,21 @@ function DLA() {
         this.tree.push(walker);
     }
 
+    this.createWalker = function() {
+        radius = radius * radiusChange;
+        if (radius < 0.1) {
+            radius = 0.1;
+        }
+
+        this.walkers.push(this.type.createWalker());        
+    }
+
     this.getGridPosition = function(walker) {
         return floor(walker.pos.x / this.gridSize) + floor(walker.pos.y / this.gridSize) * this.gridWidth;
+    }
+
+    this.drawBackground = function() {
+        this.type.drawBackground();
     }
 
     this.fixWalkerAmount = function() {
@@ -91,7 +120,7 @@ function DLA() {
                 this.walkers.splice(0, (this.walkers.length - walkersAmount));
             } else if (this.walkers.length < walkersAmount) {
                 for (let i = 0; i < walkersAmount - this.walkers.length; i++) {
-                    this.walkers.push(this.type.createWalker());
+                    this.createWalker();
                 }
             }
         }
@@ -122,6 +151,11 @@ function DLA() {
         this.tree = [];
         this.walkers = [];
         this.done = false;
+        radius = realRadius;
+        startR = realR;
+        startG = realG;
+        startB = realB;
+        
         this.resetGrid();
         this.startDLA();
     }

@@ -4,8 +4,9 @@ function TypeTree() {
     this.generateStartTree = function() {
         /* Default start with walkers at the bottom. */
         tree = [];
-        for (let i = 0; i < width; i += radius * 2) {
-            tree.push(new Walker(i, height, radius, true))
+        for (let i = 0; i < floor(width / 2); i += radius * 2) {
+            tree.push(new Walker(i, height, radius, true));
+            tree.push(new Walker(width - i, height, radius, true));
         }
 
         return tree;
@@ -17,10 +18,14 @@ function TypeTree() {
     }
     
     this.checkDone = function(walker) {
-        if (walker.pos.y == 0) {
+        if (floor(walker.pos.y) == 0) {
             return true;
         }
 
         return false;
+    }
+    
+    this.drawBackground = function() {
+        background(0);
     }
 }    
