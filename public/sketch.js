@@ -1,98 +1,93 @@
-var socket;
-var r = 5;
-var k = 30;
-var grid = [];
-var cellSize = r / Math.sqrt(2);
-var activeList = []
-var ordered = []
+var canvasWidth = 800;
+var canvasHeight = 600;
 
-var columns, rows;
+var radiusSlider;
+var radius = 4;
+
+var walkersAmount = 100;
+var walksPerFrame = 500;
+
+var dla;
 
 function setup() {
-  createCanvas(600, 600);
+  dla = new DLA();
+  dla.changeType(new TypeOriginal());
+
+  /* Create the canvas. */
+  createCanvas(canvasWidth, canvasHeight);
+
+  /* Create the buttons. */
+  typeDiv = createDiv("Type: " + this.dla.getTypeName());
+  typeInput = createInput(this.dla.getTypeName());
+  setTypeButton = createButton("Set type");
+  setTypeButton.mousePressed(setType);
   
-  // socket = io.connect('http://localhost:3000');
-  // socket.on('mouse', newDrawing)
+  radiusDiv = createDiv("Radius: " + radius);
+  radiusInput = createInput(radius);
+  setRadiusButton = createButton("Set radius");
+  setRadiusButton.mousePressed(setRadius);
+  
+  walkersAmountDiv = createDiv("Walker amount: " + walkersAmount);
+  walkersAmountInput = createInput(walkersAmount);
+  setWalkersAmountButton = createButton("Set walker amount");
+  setWalkersAmountButton.mousePressed(setWalkersAmount);
 
-  columns = floor(width / cellSize);
-  rows = floor(height / cellSize);
-  for (var i = 0; i < columns * rows; i++) {
-    grid[i] = undefined;
-  }
+  walksPerFrameDiv = createDiv("Walks per frame: " + walksPerFrame);
+  walksPerFrameInput = createInput(walksPerFrame);
+  setWalksPerFrameButton = createButton("Set walks per frame");
+  setWalksPerFrameButton.mousePressed(setWalksPerFrame);
 
-  var pos = createVector(random(width), random(height))
-  var i = floor(pos.x / cellSize);
-  var j = floor(pos.y / cellSize);
-  grid[i + j * columns] = pos;
-  activeList.push(pos);
 
-  // for (var i = 0; i < 2500; i++) {
-  //   stroke(255, 255, 255);
-  //   point(random(width), random(height));
-  // }
+  createP("");
+  resetButton = createButton("Reset");
+  resetButton.mousePressed(reset);
+
+  this.dla.reset();
 }
 
 function draw() {
   background(0);
-  colorMode(HSB);
+  dla.walk();
+  dla.show();
+}
 
-  for (var total = 0; total < 25; total++) {   
-    if (activeList.length > 0) {
-      var randomIndex = floor(random(activeList.length));
-      var randomIndexPos = activeList[randomIndex];
-      var found = false;
-      for (var n = 0; n < k; n++) {
-        var sample = p5.Vector.random2D();
-        var magnitude = random(r, 2*r);
-        sample.setMag(magnitude);
-        sample.add(randomIndexPos);
-
-        var col = floor(sample.x / cellSize);
-        var row = floor(sample.y / cellSize);
-
-        if (col < 0 || col >= columns || row < 0 || row >= rows || grid[col + row * columns]) {
-          continue;
-        }
-
-        var valid = true;
-        for (var i = -1; i <= 1; i++) {
-          for (var j = -1; j <= 1; j++) {
-            var index = (col + i) + (row + j) * columns;
-            var neighbour = grid[index];
-            if (neighbour) {
-              var distance = p5.Vector.dist(sample, neighbour);
-              if (distance < r) {
-                valid = false;
-              }
-            }
-          }
-        }
-
-        if (valid) {
-          found = true;
-          grid[col + row * columns] = sample;
-          activeList.push(sample);
-          ordered.push(sample)
-        }
-      }
-
-      if (!found) {
-        activeList.splice(randomIndex, 1);
-      }
-    }
+function setRadius() {
+  result = (int) (radiusInput.value());
+  if (!isNaN(result)) {
+    radius = result;
+    radiusDiv.html("Radius: " + radius);    
   }
+}
 
-  for (var i = 0; i < ordered.length; i++) {
-    if (ordered[i]) {
-      stroke(i / 10 % 360, 100, 100);
-      strokeWeight(4);
-      point(ordered[i].x, ordered[i].y)
-    }
+function setType() {
+  result = typeInput.value();
+  if (result == "Original") {
+    dla.changeType(new TypeOriginal());
+    typeDiv.html("Type: " + result);
+  } else if (result == "Tree") {
+    dla.changeType(new TypeTree());
+    typeDiv.html("Type: " + result);
   }
+}
 
-  // for (var i = 0; i < activeList.length; i++) {
-  //   stroke(255, 0, 255);
-  //   strokeWeight(1);
-  //   point(activeList[i].x, activeList[i].y)
-  // }
+function setWalkersAmount() {
+  result = (int) (walkersAmountInput.value());
+  if (!isNaN(result)) {
+    walkersAmount = result;
+    walkersAmountDiv.html("Walker amount: " + result);
+    dla.fixWalkerAmount();
+  }
+}
+
+function setWalksPerFrame() {
+  result = (int) (walksPerFrameInput.value());
+  if (!isNaN(result)) {
+    walksPerFrame = result;
+    walksPerFrameDiv.html("Walks per frame: " + result);
+    dla.fixWalkerAmount();
+  }
+}
+
+function reset() {
+  dla.reset();
 }
